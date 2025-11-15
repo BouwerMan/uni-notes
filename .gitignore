@@ -1,0 +1,36 @@
+# Global build dirs for each class
+**/build/
+
+# LaTeX aux files (in case some don't go into build/)
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.synctex.gz
+*.toc
+*.out
+*.nav
+*.snm
+*.vrb
+*.lof
+*.lot
+*.bbl
+*.blg
+*.run.xml
+*-blx.bib
+
+# Beamer / listings / minted / etc.
+*.nav
+*.snm
+*.vrb
+*_minted-*/
+*.pyg
+
+# Editor trash
+*~
+*.swp
+*.swo
+.DS_Store
+
+# Don’t commit compiled PDFs; treat them as build artifacts
+*.pdf

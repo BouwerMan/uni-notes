@@ -1,0 +1,55 @@
+\documentclass{article}
+
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{zref-clever}
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{listings,breakable,theorems}
+
+\newtcolorbox{idea}{
+  colback=white,
+  colframe=black!10,
+  breakable,
+  title=Idea,
+  coltitle=black
+}
+
+\newtcolorbox{derivation}{
+  colback=blue!1,
+  colframe=blue!25,
+  breakable,
+  title=Derivation
+}
+
+\newtcolorbox[
+  auto counter,
+  number within=section,
+  ]{examplebox}[1][]{
+  colback=green!5,
+  colframe=green!40,
+  coltitle=black,
+  breakable,
+  label type=example,
+  fonttitle=\bfseries,
+  title={Example \thetcbcounter},
+  #1
+}
+
+\title{EENG 4312 — Communications Notes}
+\author{Dylan Parks}
+
+\begin{document}
+\setlength{\parindent}{0pt}
+\maketitle
+\tableofcontents
+\newpage
+
+% \input{chapters/ch01-intro}
+% \input{chapters/ch02-fourier}
+% \input{chapters/ch03-modulation}
+% \input{chapters/ch04-am-fm-pm}
+\input{tex/ch04-randomprocesses}
+
+\end{document}
