@@ -6,34 +6,24 @@ on:
   pull_request:
 
 jobs:
-  build:
+  build_latex:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Install TeX Live and tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            texlive-latex-recommended \
-            texlive-latex-extra \
-            texlive-fonts-recommended \
-            texlive-lang-english \
-            latexmk \
+        uses: xu-cheng/texlive-action@v3
+        with:
+          os: debian
+          run: |
+            # Install system dependencies
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update -y
+            apt-get install -y make
             make
 
-      - name: Build EENG4312 notes with Makefile
-        working-directory: ./EENG4312
-        run: make
-
-      # Add more classes later, e.g.:
-      # - name: Build EENG4310 notes with Makefile
-      #   working-directory: ./EENG4310
-      #   run: make
-
-      - name: Upload PDFs as artifact
+      - name: Upload PDFs as artifacts
         uses: actions/upload-artifact@v4
         with:
           name: course-notes
