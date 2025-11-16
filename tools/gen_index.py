@@ -254,8 +254,12 @@ def build_html(items):
 
     <footer>
       Notes compiled by <strong>Dylan Parks</strong>.<br />
-      These notes are for study purposes only — no guarantees of correctness are made.<br />
-      Built with LaTeX, Make, and GitHub Actions.
+      These notes are for study purposes only — no guarantees of correctness are made.<br /><br />
+
+      <a href="https://github.com/BouwerMan/uni-notes"
+        style="color:#93c5fd; text-decoration:none; font-weight:500;">
+        View source on GitHub →
+      </a><br /><br />
     </footer>
   </div>
 </body>
