@@ -1,6 +1,7 @@
 \section{Chapter 4: Random Processes}
 
 \subsection{Expected Value}
+\label{subsec:expectedvalue}
 
 \begin{idea}
 	Expectation behaves like a ``center of mass’’ for a random variable.
@@ -16,6 +17,16 @@ For a discrete random variable, the integral becomes a sum:
 \begin{equation}\label{eq:expectedvaluediscrete}
 	\mathbb{E}[X] = \sum_x x\,P(X=x).
 \end{equation}
+
+One small notation nit-pick I have with the textbook. It often uses
+\(\mathbb{E}[A+B]^2\) to mean \(\mathbb{E}[(A+B)^2]\). Where we are
+getting the expectation of the square, not squaring the expectation.
+Ideally we would write everything as \(\mathbb{E}[(A+B)^2]\), but if
+the textbook is lazy with it, I will be lazy with it. Just keep in mind that
+\begin{align*}
+	\mathbb{E}[A+B]^2 & = \mathbb{E}[(A+B)^2]    \\
+	\mathbb{E}[A+B]^2 & \neq (\mathbb{E}[A+B])^2
+\end{align*}
 
 % -------------------------------------------------------------------
 
@@ -140,3 +151,142 @@ be evaluated as:
 	\]
 
 \end{examplebox}
+
+\subsection{Wide-Sense Stationary (WSS) Random Process}
+A process \(X(t)\) is said to be wide-sense stationary (WSS) if the following
+conditions are satisfied:
+\begin{enumerate}
+	\item The mean \(m_X(t) = \mathbb{E}[X(t)]\) is independent of \(t\).
+	\item The autocorrelation function \(R_X(t_1,t_2)\) depends only on the time
+	      difference \(\tau = t_2 - t_1\), and not on \(t_1\) and \(t_2\) individually.
+\end{enumerate}
+
+The autocorrelation function of the stationary process has the following properties:
+\begin{enumerate}
+	\item \(R_X(\tau)\) is an even function; i.e., \(R_X(-\tau)=R_X(\tau)\)
+	      \begin{derivation}
+		      By the definition of the autocorrelation function:
+		      \[
+			      R_X(\tau)=\mathbb{E}[X(t)X(t-\tau)]=\mathbb{E}[X(t-\tau)X(t)]=R_X(-\tau)
+		      \]
+	      \end{derivation}
+	\item The maximum absolute value of \(R_X(\tau)\) is achieved at \(\tau=0\);\\
+	      i.e., \(\abs{R_X(\tau)} \leq R_X(0)\).
+	      \begin{derivation}
+		      I'm going to first give you the textbook's proof. Then give you another
+		      proof with the Cauchy-Schwarz inequality.
+		      It is important to note that for WSS processes
+		      \[
+			      R_X(0)=\mathbb{E}[X(t)X(t)]=\mathbb{E}[X^2(t)]
+		      \]
+		      Since squares of anything are always positive, we can note that
+		      \[
+			      \mathbb{E}[X(t) \pm X(t-\tau)]^2 \geq 0
+		      \]
+		      We can then expand this to get
+		      \[
+			      \mathbb{E}[X^2(t)]+\mathbb{E}[X^2(t-\tau)]
+			      \pm 2\mathbb{E}[X(t)X(t-\tau)] \geq 0
+		      \]
+		      and with some algebraic manipulation we can get to:
+		      \begin{align*}
+			      \mathbb{E}[X^2(t)]+\mathbb{E}[X^2(t-\tau)]
+			                      & \pm 2\mathbb{E}[X(t)X(t-\tau)] \geq 0      \\
+			      R_X(0) + R_X(0) & \pm 2 R_X(\tau) \geq 0                     \\
+			                      & \pm 2R_X(\tau) \geq -2R_X(0)               \\
+			                      & \pm R_X(\tau)                  \leq R_X(0)
+		      \end{align*}
+		      which means \(\abs{R_X(\tau)} \leq R_X(0)\).
+
+		      Now onto the Cauchy-Scharz Version: \\
+		      Keep in mind we are trying to show that \(\abs{R_X(\tau)} \leq R_X(0)\).
+		      We should briefly introduce the Cauchy–Schwarz inequality:
+		      \[
+			      \abs{\mathbb{E}[UV]} \leq \sqrt{\mathbb{E}[U^2]\mathbb{E}[V^2]}
+		      \]
+		      This little inequality actually makes the proof shorter.
+		      By setting \(U=X(t)\) and \(V=X(t-\tau)\):
+		      \[
+			      \abs{R_X(\tau)} = \abs{\mathbb{E}[X(t)X(t-\tau)]}
+			      \leq \sqrt{\mathbb{E}[X^2(t)]\mathbb{E}[X^2(t-\tau)]}
+			      = R_X(0)
+		      \]
+	      \end{derivation}
+	\item If for some \(T_0\) we have \(R_X(T_0)= R_X(0)\), then for all integers \(k\),\\
+	      \(R_X(kT_0)=R_X(0)\)
+	      \begin{idea}
+		      If an autocorrelation function reaches its maximum
+		      \(R_X(0)\) at some non-zero lag \(T_0\), then it must equal \(R_X(0)\)
+		      again at every integer multiple of that lag.
+	      \end{idea}
+
+	      \begin{derivation}
+		      I'm gonna be honest, I don't feel like translating their proof into
+		      something I understand right now. It's on page 169 of the textbook
+		      though.
+
+		      Here are the first steps for it though (I got scared of the verbosity
+		      approximately halfway down):
+
+		      We want to show:
+		      \[
+			      R_X(kT_0)=R_X(0)\ \text{for all integers}\ k
+		      \]
+		      The inductive hypothesis is \(R_X(iT_0) = R_X(0)\), for \(i = 1,2,...,k-1\).
+
+		      Starting with a non-negative square:
+		      \[
+			      \mathbb{E}[X(t)-X(t-kT_0)]^2 \geq 0
+		      \]
+		      We can then split the shift \(kT_0\) into two smaller shifts:
+		      \[
+			      kT_0 = kT_0 - T_0 + T_0 = (k-1)T_0 + T_0
+		      \]
+
+		      So we can then expand our non-negative square like so:
+		      \begin{align}
+			       & \mathbb{E}[X(t)-X(t-kT_0)]^2 =  \notag \\
+			       & \mathbb{E}[(X(t)-X(t-(k-1)T_0)) \notag \\
+			       & +(X(t-(k-1)T_0)-X(t-kT_0))]^2
+			      \label{eq:nonnegative-square}
+		      \end{align}
+
+		      We can also expand things in a different way. When we expand:
+		      \[
+			      \mathbb{E}[X(t)-X(t-kT_0)]^2
+		      \]
+		      We end up with the following
+		      (\textit{Remember my notation nit-pick at the end of \zcref{subsec:expectedvalue}}):
+		      \[
+			      \mathbb{E}[X^2(t)] + \mathbb{E}[X^2(t-kT_0)]
+			      - 2\mathbb{E}[X(t)X(t-kT_0)]
+		      \]
+		      Which can be simplified to:
+		      \[
+			      R_X(0) + R_X(0) - 2R_X(kT_0) = 2R_X(0) - 2R_X(kT_0)
+		      \]
+	      \end{derivation}
+\end{enumerate}
+
+New class of processes just dropped: \textit{cyclostationary processes}.
+These are very similar to WSS processes however
+
+\begin{idea}
+	The statistical properties of cyclostationary processes are periodic with time.
+\end{idea}
+
+A random process \(X(t)\) with mean \(m_X(t)\) and autocorrelation function
+\({R_X(t+\tau,t)}\) is called cyclostationary, if both the mean and the
+autocorrelation are periodic in t with some period \(T_0\); i.e., if
+\[
+	m_X(t+T_0)=m_X(t)
+\]
+and
+\[
+	R_X(t+\tau+T_0,t+T_0)=R_X(t+\tau,t)
+\]
+for all \(t\) and \(\tau\). For a cyclostationary process, we define the average
+autocorrelation function \(\bar{R}_X(\tau)\), as the average of \(R_X(t+\tau,t)\).
+\[
+	\bar{R}_X(\tau)=\frac{1}{T_0}\int_0^{T_0}R_X(t+\tau,t)dt
+\]
