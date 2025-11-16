@@ -38,4 +38,4 @@ jobs:
         with:
           name: course-notes
           path: |
-            eeng4312-comm/build/*.pdf
+            EENG4312/build/*.pdf
