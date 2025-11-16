@@ -1,5 +1,6 @@
 # Global build dirs for each class
 **/build/
+site/
 
 # LaTeX aux files (in case some don't go into build/)
 *.aux

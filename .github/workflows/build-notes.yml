@@ -31,20 +31,15 @@ jobs:
           run: |
             export DEBIAN_FRONTEND=noninteractive
             apt-get update -y
-            apt-get install -y make
-            make
+            apt-get install -y make python3
+            make site
 
       - name: Upload PDFs as artifacts
         uses: actions/upload-artifact@v4
         with:
           name: course-notes
           path: |
-            EENG4312/build/*.pdf
-
-      - name: Collect PDFs for Pages
-        run: |
-          mkdir -p site
-          cp EENG4312/build/EENG4312.pdf site/EENG4312.pdf
+            site/*.pdf
 
       - name: Upload static files for Pages
         uses: actions/upload-pages-artifact@v3
