@@ -5,7 +5,7 @@ BUILDDIR := build
 all: latex
 
 latex:
-	latexmk -pdf -lualatex -synctex=1 -file-line-error -interaction=nonstopmode main.tex
+	latexmk -pdf -lualatex -synctex=1 -file-line-error -interaction=nonstopmode main.tex -jobname=EENG4312
 
 watch-tex:
 	latexmk -pvc -pdf -lualatex -synctex=1 -file-line-error -interaction=nonstopmode main.tex

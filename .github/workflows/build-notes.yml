@@ -5,19 +5,30 @@ on:
     branches: [main]
   pull_request:
 
+# Required for GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# So only one Pages deploy runs at a time
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
-  build_latex:
+  build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install TeX Live and tools
+      - name: Install TeX Live and build via Makefile
         uses: xu-cheng/texlive-action@v3
         with:
           os: debian
           run: |
-            # Install system dependencies
             export DEBIAN_FRONTEND=noninteractive
             apt-get update -y
             apt-get install -y make
@@ -29,3 +40,25 @@ jobs:
           name: course-notes
           path: |
             EENG4312/build/*.pdf
+
+      - name: Collect PDFs for Pages
+        run: |
+          mkdir -p site
+          cp EENG4312/build/EENG4312.pdf site/EENG4312.pdf
+
+      - name: Upload static files for Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
