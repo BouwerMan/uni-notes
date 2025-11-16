@@ -158,8 +158,21 @@ conditions are satisfied:
 \begin{enumerate}
 	\item The mean \(m_X(t) = \mathbb{E}[X(t)]\) is independent of \(t\).
 	\item The autocorrelation function \(R_X(t_1,t_2)\) depends only on the time
-	      difference \(\tau = t_2 - t_1\), and not on \(t_1\) and \(t_2\) individually.
+	      difference \(\tau = t_1 - t_2\), and not on \(t_1\) and \(t_2\) individually.
+	      \[
+		      R_X(t_1,t_2) = R_X(t_1 - t_2) = R_X(\tau)
+	      \]
 \end{enumerate}
+
+This means for WSS processes, the definition of the autocorrelation function
+can be simplified to:
+\[
+	R_X(t+\tau,t) = R_X(\tau) = \mathbb{E}[X(t)X(t-\tau)]
+\]
+
+In general, the term \textit{stationary} is used to refer to WSS processes.
+For these processes, the mean is often denoted simply as \(m_X\) and the
+autocorrelation function as \(R_X(\tau)\).
 
 The autocorrelation function of the stationary process has the following properties:
 \begin{enumerate}
@@ -268,24 +281,26 @@ The autocorrelation function of the stationary process has the following propert
 	      \end{derivation}
 \end{enumerate}
 
+\subsection{Cyclostationary Random Processes}
 New class of processes just dropped: \textit{cyclostationary processes}.
-These are very similar to WSS processes however
 
 \begin{idea}
 	The statistical properties of cyclostationary processes are periodic with time.
 \end{idea}
 
-A random process \(X(t)\) with mean \(m_X(t)\) and autocorrelation function
-\({R_X(t+\tau,t)}\) is called cyclostationary, if both the mean and the
-autocorrelation are periodic in t with some period \(T_0\); i.e., if
+A process \(X(t)\) is called cyclostationary if its statistics repeat periodically in time.
+That means the mean satisfies
 \[
 	m_X(t+T_0)=m_X(t)
 \]
-and
+and the autocorrelation also repeats every period:
 \[
 	R_X(t+\tau+T_0,t+T_0)=R_X(t+\tau,t)
 \]
-for all \(t\) and \(\tau\). For a cyclostationary process, we define the average
+
+In other words, the process behaves like a stationary one, but only once per cycle.
+
+For a cyclostationary process, we define the average
 autocorrelation function \(\bar{R}_X(\tau)\), as the average of \(R_X(t+\tau,t)\).
 \[
 	\bar{R}_X(\tau)=\frac{1}{T_0}\int_0^{T_0}R_X(t+\tau,t)dt
