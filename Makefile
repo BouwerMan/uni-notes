@@ -20,12 +20,13 @@ site: all
 	@mkdir -p $(SITE_DIR)
 	@echo "Collecting PDFs into $(SITE_DIR)/"
 	@for class in $(CLASSES); do \
-		pdf="$$class/build/$$class.pdf"; \
+		pdf="$$class/build/main.pdf"; \
 		if [ -f "$$pdf" ]; then \
-			cp "$$pdf" "$(SITE_DIR)/$$class.pdf"; \
+			cp "$$pdf" "$(SITE_DIR)/main.pdf"; \
+			echo "Found: $$pdf"; \
 		else \
 			echo "Warning: $$pdf not found" >&2; \
 		fi; \
 	done
 	@echo "Generating HTML index"
-	@python3 tools/gen_index.py $(SITE_DIR) $(CLASSES)
+	python3 tools/gen_index.py $(SITE_DIR) $(CLASSES)

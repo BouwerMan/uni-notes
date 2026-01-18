@@ -16,7 +16,7 @@ def main():
 
     items = []
     for cls in classes:
-        pdf_name = f"{cls}.pdf"
+        pdf_name = "main.pdf"
         pdf_path = out_dir / pdf_name
         if pdf_path.exists():
             items.append((cls, pdf_name))
