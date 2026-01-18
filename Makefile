@@ -1,8 +1,8 @@
-.PHONY: EENG4312 all clean site
-
-CLASSES := EENG4312
+CLASSES := EENG4312 PHIL2306
 
 SITE_DIR := site
+
+.PHONY: all clean $(CLASSES) $(SITE_DIR)
 
 all: $(CLASSES)
 

@@ -1,0 +1,47 @@
+\documentclass{article}
+
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{listings,breakable,theorems}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\usepackage[style=authoryear, backend=biber]{biblatex}
+\addbibresource{references.bib}
+
+% Idea box is great for summarizing
+\newtcolorbox{idea}{
+  colback=white, colframe=black!10, breakable,
+  title=Concept, coltitle=black % Renamed Title
+}
+
+% Use this for reconstructing an author's logical argument
+\newtcolorbox{argument}{
+  colback=blue!1, colframe=blue!25, breakable,
+  title=Argument Structure
+}
+
+% Quote box for primary text citations
+\newtcolorbox{keyquote}[1][]{
+  colback=gray!5, colframe=gray!40,
+  fontupper=\itshape, title={#1},
+  breakable
+}
+
+\newtcolorbox{readingnotes}{
+  colback=orange!10, colframe=orange!70,
+  title=Raw Reading Notes,
+  visible=true % Change to 'false' to hide them in the final PDF
+}
+
+\title{PHIL 2306 — Introduction to Ethics}
+\author{Dylan Parks}
+
+\begin{document}
+\setlength{\parindent}{0pt}
+\maketitle
+\tableofcontents
+\newpage
+
+\input{tex/week01-logic.tex}
+
+\end{document}
