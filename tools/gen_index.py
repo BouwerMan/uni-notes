@@ -17,10 +17,11 @@ def main():
     items = []
     for cls in classes:
         pdf_name = "main.pdf"
-        pdf_path = out_dir / pdf_name
+        pdf_path = Path(f"{cls}/build/{pdf_name}")
         if pdf_path.exists():
-            items.append((cls, pdf_name))
+            items.append((cls, cls + ".pdf"))
         else:
+            print("Could not find pdf in " + cls)
             # Skip classes without PDFs; Make already warned
             continue
 

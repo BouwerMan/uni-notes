@@ -22,7 +22,7 @@ site: all
 	@for class in $(CLASSES); do \
 		pdf="$$class/build/main.pdf"; \
 		if [ -f "$$pdf" ]; then \
-			cp "$$pdf" "$(SITE_DIR)/main.pdf"; \
+			cp "$$pdf" "$(SITE_DIR)/$$class.pdf"; \
 			echo "Found: $$pdf"; \
 		else \
 			echo "Warning: $$pdf not found" >&2; \
