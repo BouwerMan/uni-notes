@@ -1,0 +1,135 @@
+\chapter{Turn-On}
+\label{ch:turn-on}
+
+Damping sized for $\Zo$ is not sized for turn-on. A filter that passes
+Middlebrook comfortably can still ring well past its input voltage on a
+step, and the damping resistor takes a large pulse even though its
+steady-state dissipation is tiny.
+
+During the first moments of turn-on the converter is usually held off by
+undervoltage lockout and enable delay, so it draws nothing. The filter is then
+just a series RLC driven by a voltage step.
+
+\section{Step response of one stage}
+
+\begin{derivation}
+	The capacitor voltage of a series RLC driven by a step $V$ is
+	\[
+		V_C(s) = \frac{V}{s}\cdot\frac{1}{1 + sC\Rloop + s^2LC}.
+	\]
+	Matching the denominator to $1 + 2\zeta s/\omega_0 + s^2/\omega_0^2$ gives
+	\[
+		\zeta = \frac{\omega_0 C\Rloop}{2} = \frac{\Rloop}{2R_0} = \frac{1}{2Q}.
+	\]
+	The standard underdamped second-order step response then gives the
+	peak at $t = \pi/\omega_d$, with $\omega_d = \omega_0\sqrt{1 - \zeta^2}$:
+	\[
+		\frac{V_{pk}}{V} = 1 + e^{-\pi\zeta/\sqrt{1-\zeta^2}}.
+	\]
+	For the current: with no loss, $i(t) = (V/R_0)\sin\omega_0 t$, peaking a
+	quarter period in at $t = \pi/(2\omega_0)$. The envelope decays as
+	$e^{-\zeta\omega_0 t}$, so
+	\[
+		I_{pk} \approx \frac{V}{R_0}\,e^{-\zeta\pi/2}.
+	\]
+\end{derivation}
+
+\begin{idea}
+	A lossless LC overshoots to \emph{twice} the input voltage. Every bit of
+	$\Rloop$ pulls that down, but a filter with $Q = 25$ still gets most of the way there.
+\end{idea}
+
+\section{The damped ladder}
+
+Treat the dominant low mode as second order, with an effective $Q$ read off
+the $\Zo$ peak:
+\[
+	Q_{eff} = \frac{\abs{\Zo}_{peak}}{R_{0,low}}, \qquad \zeta = \frac{1}{2Q_{eff}}.
+\]
+Expect the estimate within about 10\%. Simulate before trusting it for a part rating.
+
+\section{The damping resistor}
+
+\subsection{Steady state}
+
+At DC the leg and $L_1$ are in parallel, so the DC current splits by resistance:
+\[
+	I_{R_d} = I_{DC}\,\frac{R_{L1}}{R_{L1} + R_d + R_{Ld}}, \qquad P_{R_d} = I_{R_d}^2 R_d.
+\]
+Since $R_d \gg R_{L1}$, this is a few milliwatts.
+
+\subsection{At turn-on}
+
+\begin{derivation}
+	Charge capacitors from a step $V$ through any network of resistors and
+	inductors, and wait until everything settles (converter still off, so no
+	DC current flows). The source delivers charge $Q = CV$ at constant voltage $V$:
+	\[
+		E_{source} = \int V\,i\,dt = V\cdot CV = CV^2.
+	\]
+	The capacitors end up storing $\tfrac{1}{2}CV^2$. The inductors end with
+	zero current, so they store nothing. The rest, $\tfrac{1}{2}CV^2$, was burned
+	in the resistors, whatever their values. $R_d$ is one of them, so
+	\[
+		E_{R_d} \leq \sum E_R = \tfrac{1}{2}(C_1 + C_2)\,V^2.
+	\]
+\end{derivation}
+
+Size $R_d$ from its pulse energy curve, not its continuous rating.
+
+\begin{idea}
+	An upstream series resistance or current limit (a current-limited supply, a hot-swap controller, an inrush limiter)
+	is what actually tames the overshoot. The ideal step is the worst case.
+\end{idea}
+
+\begin{examplebox}[label=ex:turn-on-lc]{turning on the first-try LC}
+	The \zcref{ex:first-try} stage on an ideal 0 to \qty{120}{\volt} step, converter off:
+	\[
+		\zeta = \frac{0.13}{2(3.16)} = 0.0206, \qquad
+		\frac{V_{pk}}{V} = 1 + e^{-\pi(0.0206)} = 1.937, \qquad
+		V_{pk} = \qty{232.5}{\volt}.
+	\]
+	The capacitor rings to almost twice the bus, well past the converter's
+	\qty{200}{\volt} overvoltage shutdown. The inrush peak is
+	\[
+		I_{pk} \approx \frac{120}{3.16}\,e^{-0.0206\pi/2} = \qty{36.7}{\ampere}
+	\]
+	(\qty{36.8}{\ampere} simulated) for a device that draws under an amp in operation.
+\end{examplebox}
+
+\begin{examplebox}[label=ex:turn-on-candidate]{turning on the candidate}
+	\textbf{Estimate.} From \zcref{ex:candidate-damped}, the low mode has
+	$\abs{\Zo}_{peak} = \qty{6.63}{\ohm}$ and $R_{0,low} = \qty{2.38}{\ohm}$:
+	\[
+		Q_{eff} = \frac{6.63}{2.38} = 2.79, \qquad \zeta = 0.18, \qquad
+		\frac{V_{pk}}{V} = 1 + e^{-\pi(0.18)/\sqrt{1 - 0.18^2}} = 1.56, \qquad
+		V_{pk} \approx \qty{188}{\volt}.
+	\]
+
+	\textbf{Simulation.} A state-space simulation gives \qty{203}{\volt} at
+	$C_2$ and a \qty{50.3}{\ampere} inrush. So the damping that gave a 22.2~dB
+	stability margin still trips the \qty{200}{\volt} shutdown. Without the leg
+	it is \qty{231}{\volt} and \qty{45.4}{\ampere}. The leg lowers the voltage
+	peak but \emph{raises} the inrush, because $L_1 \parallel L_d$ is the
+	inductance the edge sees.
+
+	\textbf{Damping resistor, steady state.} At \qty{100}{\volt} and full load,
+	$I_{DC} = \qty{1.176}{\ampere}$ and
+	\[
+		I_{R_d} = 1.176 \times \frac{0.08}{0.08 + 3.4 + 0.05} = \qty{26.7}{\milli\ampere},
+		\qquad P_{R_d} = (0.0267)^2(3.4) = \qty{2.4}{\milli\watt}.
+	\]
+
+	\textbf{Damping resistor, turn-on.} The simulation puts \qty{40}{\milli\joule}
+	into $R_d$ in the first \qty{2}{\milli\second}, with a \qty{16.2}{\ampere}
+	peak and \qty{889}{\watt} peak power. The bound is
+	$\tfrac{1}{2}(\qty{6.9}{\micro\farad})(\qty{120}{\volt})^2 = \qty{49.7}{\milli\joule}$.
+	A resistor that dissipates milliwatts in operation needs a pulse rating of
+	tens of millijoules.
+
+	\textbf{Series resistance.} Adding source resistance tames it:
+	\qty{2}{\ohm} total gives \qty{136}{\volt} and \qty{29.4}{\ampere};
+	\qty{5}{\ohm} gives \qty{120.7}{\volt} and \qty{17.5}{\ampere}.
+	In a real system the supply's current limit or an inrush limiter does this
+	job, and the ideal step is the worst case.
+\end{examplebox}

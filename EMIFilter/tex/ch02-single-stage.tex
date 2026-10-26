@@ -1,0 +1,265 @@
+\chapter{One LC Stage}
+\label{ch:single-stage}
+
+A single series $L$ feeding a shunt $C$ is the building block for everything
+else. Get the transfer function, the resonant peak and the output impedance of
+one stage right, and the ladders in later chapters are just more of the same algebra.
+
+\section{Transfer function}
+
+With an ideal source, one stage is $H = Z_C/(Z_C + Z_L)$ from
+\zcref{eq:current-divider}. Put both parasitics in:
+$Z_L = R_L + sL$ and $Z_C = \ESR + 1/(sC)$.
+
+\begin{derivation}
+	Multiply top and bottom by $sC$:
+	\[
+		H(s) = \frac{\ESR + \frac{1}{sC}}{\ESR + \frac{1}{sC} + R_L + sL}
+		= \frac{1 + sC\,\ESR}{1 + sC\,\Rloop + s^2 LC},
+		\qquad \Rloop = R_L + \ESR.
+	\]
+	Now match it term by term against the standard second-order template:
+	\[
+		H(s) = \frac{1 + s/\omega_z}{1 + \dfrac{s}{Q\omega_0} + \left(\dfrac{s}{\omega_0}\right)^2}.
+	\]
+	The $s^2$ term gives $\omega_0^2 = 1/(LC)$. The $s$ term gives
+	\[
+		\frac{1}{Q\omega_0} = C\Rloop
+		\quad\Rightarrow\quad
+		Q = \frac{1}{\omega_0 C \Rloop} = \frac{R_0}{\Rloop},
+	\]
+	using $1/(\omega_0 C) = \sqrt{L/C} = R_0$. The numerator gives the ESR zero
+	$\omega_z = 1/(C\,\ESR)$.
+\end{derivation}
+
+With $x = f/f_0$, the magnitude is
+\begin{equation}\label{eq:H-single-mag}
+	\abs{H} = \frac{\sqrt{1 + (f/f_z)^2}}{\sqrt{(1 - x^2)^2 + (x/Q)^2}}.
+\end{equation}
+
+\section{The resonant peak}
+
+At $x = 1$ the $(1 - x^2)$ term vanishes and only the damping term is left:
+\begin{equation}\label{eq:H-peak}
+	\abs{H(f_0)} = Q\sqrt{1 + (f_0/f_z)^2} \approx Q.
+\end{equation}
+
+\begin{idea}
+	A filter \emph{amplifies} noise at its resonance, by a factor of $Q$.
+	A stage with $Q = 25$ turns a noise line sitting at $f_0$ into one 28~dB
+	louder. $Q$ is ``reactance over loss'': how many times the resonance amplifies.
+\end{idea}
+
+The exact peak of \zcref{eq:H-single-mag} (ignoring the ESR zero) sits slightly
+below $f_0$, at $x = \sqrt{1 - 1/(2Q^2)}$, with height $Q/\sqrt{1 - 1/(4Q^2)}$.
+For any $Q$ worth worrying about, that is $f_0$ and $Q$.
+
+\section{Above resonance}
+\label{sec:above-resonance}
+
+\begin{derivation}
+	Above resonance $\abs{Z_C} \ll \abs{Z_L}$. In the lossless case,
+	\[
+		\abs{H} = \frac{1}{x^2 - 1} \approx \frac{1}{x^2}
+		= \frac{1}{\omega^2 LC} = \frac{\omega_0^2}{\omega^2}
+		= \left(\frac{f_0}{f}\right)^2.
+	\]
+	In dB, the attenuation $A = 1/\abs{H}$ is
+	\[
+		A_{dB} = 40\log_{10}\frac{f}{f_0}.
+	\]
+	The approximation is off by the factor $x^2/(x^2 - 1)$, which is under
+	0.1~dB once $f > 5f_0$.
+\end{derivation}
+
+\section{Output impedance peak}
+\label{sec:zo-peak}
+
+Looking back from the converter with the source shorted, $L$ and $C$ are in parallel:
+\[
+	\Zo = Z_L \parallel Z_C = \frac{Z_L Z_C}{Z_L + Z_C}.
+\]
+
+\begin{derivation}
+	At $\omega_0$ the reactances cancel in the denominator, leaving only the losses:
+	\[
+		Z_L + Z_C = \Rloop + j\left(\omega_0 L - \frac{1}{\omega_0 C}\right) = \Rloop.
+	\]
+	The numerator is barely affected by the small losses:
+	\[
+		Z_L Z_C \approx (j\omega_0 L)\left(\frac{1}{j\omega_0 C}\right) = \frac{L}{C} = R_0^2.
+	\]
+	So
+	\begin{equation}\label{eq:zo-peak}
+		\abs{\Zo}_{peak} \approx \frac{R_0^2}{\Rloop} = QR_0.
+	\end{equation}
+	Physically: at $f_0$ the loop current is limited only by $\Rloop = \DCR + \ESR$.
+\end{derivation}
+
+\begin{idea}
+	Low-loss parts make a \emph{worse} filter for stability. Halving the DCR
+	doubles the $\Zo$ peak. That is why damping is added on purpose (\zcref{ch:damping}).
+\end{idea}
+
+\section{Parasitics: where each one matters}
+
+\begin{itemize}
+	\item Series parasitics set $Q$. Shunt parasitics make zeros.
+	\item Each parasitic matters only near its own frequency.
+	\item Series $R$ matters within about $\pm f_0/(2Q)$ of $f_0$.
+	\item ESR matters approaching and above $f_z = 1/(2\pi C\,\ESR)$, where it
+	      bends the $-40$~dB/decade slope toward $-20$.
+\end{itemize}
+
+\begin{examplebox}[label=ex:first-try]{a first-try LC}
+	A natural first attempt for the example device is a single stage with
+	$L = \qty{68}{\micro\henry}$ (\qty{0.12}{\ohm} DCR) and
+	$C = \qty{6.8}{\micro\farad}$ (\qty{10}{\milli\ohm} ESR), on an ideal source.
+
+	\textbf{Resonance.}
+	\[
+		f_0 = \frac{1}{2\pi\sqrt{(\qty{68}{\micro\henry})(\qty{6.8}{\micro\farad})}} = \qty{7.40}{\kHz},
+		\qquad R_0 = \sqrt{\frac{68}{6.8}}\,\Omega = \qty{3.16}{\ohm}.
+	\]
+
+	\textbf{Output impedance.} $\Rloop = 0.12 + 0.01 = \qty{0.13}{\ohm}$, so
+	\[
+		Q = \frac{3.16}{0.13} = 24.3, \qquad
+		\abs{\Zo}_{peak} \approx \frac{R_0^2}{\Rloop} = \frac{10}{0.13} = \qty{76.9}{\ohm}.
+	\]
+	An exact sweep gives \qty{77.0}{\ohm}, so the shortcut is excellent.
+
+	\textbf{Stability.} Against $\abs{\Zin} = \qty{85.0}{\ohm}$ from \zcref{ex:zin}:
+	\[
+		\text{margin} = 20\log_{10}\frac{85.0}{77.0} = 0.9~\text{dB}.
+	\]
+	That fails the 10~dB target badly. This innocent-looking filter is within
+	10\% of oscillating.
+
+	\textbf{Attenuation.} At \qty{400}{\kHz} the asymptote gives
+	$\abs{H} \approx (7.40/400)^2$, or $-69.3$~dB. The exact value is $-69.2$~dB.
+
+	\textbf{Resonant peak.} $\abs{H}$ peaks at $20\log_{10} 24.3 = +27.7$~dB at
+	\qty{7.40}{\kHz}. Any noise near \qty{7.4}{\kHz} comes out 24 times larger.
+\end{examplebox}
+
+% -------------------------------------------------------------------
+
+\section{Sizing from the emission requirement}
+\label{sec:requirement}
+
+The attenuation requirement sets how low the filter's resonance must sit.
+Use the worst case: lowest input voltage, full load, lowest switching frequency.
+\[
+	P_{in} = \frac{P_{out}}{\eta}, \qquad I_{avg} = \frac{P_{in}}{V_{min}}.
+\]
+
+\subsection{Bounding the noise current}
+
+Without a measured spectrum, you still know the converter's input current is a
+pulse train that never goes negative. That alone bounds every harmonic.
+
+\begin{derivation}
+	The complex Fourier coefficient of harmonic $k$ is
+	\[
+		c_k = \frac{1}{T}\int_0^T i(t)\,e^{-jk\omega t}\,dt.
+	\]
+	The amplitude of the real sinusoid at $k\omega$ is $\abs{I_k} = 2\abs{c_k}$.
+	Since $i(t) \geq 0$ and $\abs{e^{-jk\omega t}} = 1$,
+	\[
+		\abs{I_k} = \frac{2}{T}\abs*{\int_0^T i(t)\,e^{-jk\omega t}\,dt}
+		\leq \frac{2}{T}\int_0^T i(t)\,dt = 2I_{avg}.
+	\]
+\end{derivation}
+
+\begin{derivation}
+	The bound is tight for narrow pulses. For a rectangular pulse train of
+	height $I_p$ and width $\tau$, the fundamental is
+	\[
+		\abs{I_1} = \frac{2I_p}{\pi}\sin\frac{\pi\tau}{T}.
+	\]
+	For $\tau \ll T$, $\sin(\pi\tau/T) \approx \pi\tau/T$, so
+	\[
+		\abs{I_1} \approx \frac{2I_p}{\pi}\cdot\frac{\pi\tau}{T} = 2I_p\frac{\tau}{T} = 2I_{avg}.
+	\]
+	So $2I_{avg}$ is the right conservative estimate.
+\end{derivation}
+
+Convert to the units of the limit:
+\[
+	I_{rms} = \frac{I_{pk}}{\sqrt{2}}, \qquad
+	N_{\text{dB}\mu\text{A}} = 20\log_{10}\frac{I_{rms}}{\qty{1}{\micro\ampere}}.
+\]
+
+\subsection{Required attenuation}
+
+\begin{equation}\label{eq:A-req}
+	A_{req} = N_{\text{dB}\mu\text{A}}(f_{sw}) - \text{Limit}_{\text{dB}\mu\text{A}}(f_{sw}) + \text{margin}.
+\end{equation}
+
+Use the lowest switching frequency the converter reaches at your load and
+line. A resonant (ZCS) converter's frequency moves with load, and attenuation
+is worst at the low end.
+
+\subsection{One stage or two}
+
+Invert the asymptotes. One stage needs $40\log_{10}(f_{sw}/f_0) = A_{req}$:
+\begin{equation}\label{eq:one-stage-size}
+	f_0 = \frac{f_{sw}}{10^{A_{req}/40}}, \qquad L = \frac{1}{(2\pi f_0)^2 C}.
+\end{equation}
+
+Two stages need $40\log_{10}(f_{sw}^2/(f_{01}f_{02})) = A_{req}$, which fixes
+only the \emph{product} of the stage resonances:
+\begin{equation}\label{eq:two-stage-size}
+	f_{01}f_{02} = \frac{f_{sw}^2}{10^{A_{req}/40}}.
+\end{equation}
+
+Its geometric mean $\sqrt{f_{01}f_{02}}$ is a useful ``typical'' stage
+frequency, and it sits much higher than the single-stage $f_0$. That is the
+whole case for two stages: higher resonances mean smaller parts.
+
+\begin{idea}
+	Budget penalties up front. Fold every known loss of attenuation into one number,
+	valid where the asymptotes hold:
+	\[
+		A_{req}' = A_{req} + \sum \text{penalties}_{dB}
+		\quad \text{(damping, cap bias, tolerance)}.
+	\]
+\end{idea}
+
+Two handy dB facts: a factor of 2 is 6.02~dB and a factor of 10 is 20~dB.
+Sanity check any $H$: as $f \to \infty$, $\abs{H}$ must go to 0.
+
+\begin{examplebox}[label=ex:requirement]{the attenuation requirement}
+	\textbf{Noise current.} At \qty{100}{\volt} and full load,
+	$I_{avg} = \qty{117.6}{\watt}/\qty{100}{\volt} = \qty{1.176}{\ampere}$.
+	The fundamental is bounded by
+	\[
+		\abs{I_1} \leq 2I_{avg} = \qty{2.35}{\ampere}~\text{pk}
+		= \qty{1.66}{\ampere}~\text{rms}
+		= 20\log_{10}(1.66\times 10^{6}) = 124.4~\text{\dBuA}.
+	\]
+
+	\textbf{Requirement.} From \zcref{eq:A-req}:
+	\[
+		A_{req} = 124.4 - 50 + 6 = 80.4~\text{dB}.
+	\]
+	The first-try filter of \zcref{ex:first-try} gives 69.2~dB, so it is
+	11.2~dB short as well as unstable.
+
+	\textbf{One stage.} From \zcref{eq:one-stage-size}:
+	\[
+		f_0 = \frac{\qty{400}{\kHz}}{10^{80.4/40}} = \qty{3.90}{\kHz},
+		\qquad
+		L = \frac{1}{(2\pi \cdot \qty{3.90}{\kHz})^2(\qty{6.8}{\micro\farad})} = \qty{244}{\micro\henry}.
+	\]
+	That is before any damping, which will cost more (\zcref{ex:single-damped}).
+
+	\textbf{Two stages.} From \zcref{eq:two-stage-size}:
+	\[
+		f_{01}f_{02} = \frac{(\qty{400}{\kHz})^2}{10^{80.4/40}} = \qty{1.56e9}{\hertz\squared},
+		\qquad \sqrt{f_{01}f_{02}} = \qty{39.5}{\kHz}.
+	\]
+	Each stage can resonate about ten times higher than the single stage, so
+	the parts are much smaller.
+\end{examplebox}

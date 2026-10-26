@@ -1,0 +1,130 @@
+\chapter{Source Impedance}
+\label{ch:source}
+
+\begin{idea}
+	The source is part of the filter. The same filter has a different $\Zo$ and
+	$H$ on every source it sees, so the stability check has to be repeated for
+	each one: the bus in service, and every test setup the device will be
+	connected to.
+\end{idea}
+
+\section{Source models}
+
+Three sources cover most cases. All models are for the DM loop.
+\begin{equation}\label{eq:source-models}
+	Z_{bus} = R_s + sL_s, \qquad
+	Z_{ft} = R + sL_{lead} + \frac{1}{s\,(C_{ft}/2)}, \qquad
+	Z_{x} = j\omega L_x + \frac{\omega L_x}{Q_x} + Z_{bus}.
+\end{equation}
+
+\begin{itemize}
+	\item \textbf{Stiff bus.} A small resistance and the wiring inductance.
+	\item \textbf{Feedthrough capacitors.} Conducted emissions setups often put
+	      a large feedthrough capacitor from each line to the ground plane. The two
+	      sit in series around the DM loop, so the filter sees $C_{ft}/2$. The
+	      model holds above the frequency where the capacitors swamp the bench
+	      supply behind them, around \qty{10}{\kHz} for \qty{10}{\micro\farad} parts.
+	\item \textbf{Series injection transformer.} Conducted susceptibility tests
+	      often inject audio-frequency ripple through a transformer whose secondary
+	      is in series with the power line. With its primary unterminated, the
+	      secondary looks like a large inductor with modest $Q$, modeled here at
+	      constant $Q$.
+\end{itemize}
+
+\section{New resonances from the source}
+
+\subsection{A capacitive source}
+
+The source capacitance resonates with the filter's input inductance. The true
+frequency sits between two bounding estimates:
+\[
+	f \approx \frac{1}{2\pi\sqrt{L_{in}\,C_{src}}}
+	\ \text{to}\
+	\frac{1}{2\pi\sqrt{L_{in}\,(C_{src} \text{ in series with } C_1 + C_2)}},
+	\qquad L_{in} = L_{lk} + L_1 \parallel L_d + L_{lead}.
+\]
+
+\subsection{A large series inductance}
+
+When the external inductance dominates, it forms a new low mode with all the
+filter capacitance:
+\begin{equation}\label{eq:series-l-mode}
+	f_x = \frac{1}{2\pi\sqrt{L_{tot}(C_1 + C_2)}}, \qquad
+	R_0 = \sqrt{\frac{L_{tot}}{C_1 + C_2}}, \qquad
+	\abs{\Zo}_{peak} \approx Q_x R_0,
+\end{equation}
+with $L_{tot} = L_x + L_{lk} + L_1 + L_2$. Because $L_x$ is large, $R_0$ is
+large, and the peak can easily exceed $\abs{\Zin}$. This is a nasty failure,
+because it needs no test signal: the filter, transformer and converter can
+oscillate as soon as the device powers up.
+
+\begin{idea}
+	A damping leg across an inductor damps only resonances that inductor takes
+	part in. A leg across a shunt capacitor damps any upstream inductance
+	resonating with that capacitor, \emph{including inductance you do not own}.
+\end{idea}
+
+To size an $R_d$--$C_d$ leg across $C_2$ for the series-inductance mode, use
+\zcref{eq:rd-cd-opt} with $L = L_{tot}$ and $C = C_1 + C_2$. The other fix is
+at the source: a few ohms across the transformer primary damps it directly.
+
+\begin{examplebox}[label=ex:sources]{the candidate on three sources}
+	The damped candidate from \zcref{ex:candidate-damped} ($n = 1$,
+	$R_d = \qty{3.4}{\ohm}$) on:
+	\begin{itemize}
+		\item a stiff bus, $\qty{0.02}{\ohm} + s\cdot\qty{1}{\micro\henry}$;
+		\item a feedthrough setup, two \qty{10}{\micro\farad} capacitors
+		      (\qty{5}{\micro\farad} DM) with \qty{1.5}{\micro\henry} of lead
+		      and \qty{0.01}{\ohm};
+		\item the stiff bus plus a \qty{0.8}{\milli\henry}, $Q = 10$ transformer
+		      secondary in series.
+	\end{itemize}
+
+	\begin{center}
+		\small
+		\begin{tabular}{@{}llll@{}}
+			\toprule
+			Source              & $\Zo$ peak                                    & Margin   & $\abs{H}$ at \qty{400}{\kHz} \\
+			\midrule
+			Ideal               & \qty{6.63}{\ohm} at \qty{10.9}{\kHz}          & 22.2~dB  & $-92.2$~dB                   \\
+			Stiff bus           & \qty{6.75}{\ohm} at \qty{10.7}{\kHz}          & 22.0~dB  & $-92.5$~dB                   \\
+			Feedthrough setup   & \qty{4.89}{\ohm} at \qty{63}{\kHz} (above \qty{10}{\kHz}) & 24.8~dB & $-92.7$~dB    \\
+			Series transformer  & \qty{96.0}{\ohm} at \qty{2.08}{\kHz}          & $-1.1$~dB  & $-123.9$~dB                  \\
+			\bottomrule
+		\end{tabular}
+	\end{center}
+
+	\textbf{Feedthrough setup.} The \qty{5}{\micro\farad} source against
+	$L_{in} = 2 + 19.5 + 1.5 = \qty{23}{\micro\henry}$ gives \qty{14.8}{\kHz}.
+	With $C_1 + C_2$ in series with it, \qty{19.5}{\kHz}. The exact $H$ peak,
+	$+4.6$~dB at \qty{17.3}{\kHz}, falls between the two. Stability is fine, but
+	noise near \qty{17}{\kHz} is amplified rather than attenuated in this setup.
+
+	\textbf{Series transformer.} From \zcref{eq:series-l-mode},
+	$L_{tot} = \qty{0.846}{\milli\henry}$ against \qty{6.9}{\micro\farad}:
+	\[
+		f_x = \qty{2.08}{\kHz}, \qquad R_0 = \qty{11.1}{\ohm}, \qquad
+		\abs{\Zo}_{peak} \approx 10 \times 11.1 = \qty{111}{\ohm}.
+	\]
+	The exact value is \qty{96.0}{\ohm}. That exceeds $\abs{\Zin} = \qty{85.0}{\ohm}$,
+	so the source, filter and converter can oscillate.
+	The damping leg cannot help, because 95\% of this mode's inductance is $L_x$
+	and the leg shunts only $L_1$.
+\end{examplebox}
+
+\begin{examplebox}[label=ex:rd-cd]{an $R_d$--$C_d$ leg for the transformer}
+	Size a leg across $C_2$ with \zcref{eq:rd-cd-opt}, using
+	$R_0 = \qty{11.07}{\ohm}$ and the \qty{26.9}{\ohm} target:
+	\[
+		k = \left(\frac{26.9}{11.07}\right)^2 = 5.90, \qquad
+		n_{min} = \frac{1 + \sqrt{1 + 4(5.90)}}{5.90} = 1.01, \qquad
+		C_d = 1.01 \times \qty{6.9}{\micro\farad} = \qty{6.97}{\micro\farad}.
+	\]
+	Rounding down to a standard \qty{6.8}{\micro\farad} ($n = 0.99$) gives
+	$R_{d,opt} = \qty{16.2}{\ohm}$. The sweep then shows \qty{20.4}{\ohm} at
+	\qty{1.71}{\kHz} on the transformer, a 12.4~dB margin.
+
+	On the stiff bus the low-mode peak drops to \qty{4.78}{\ohm} (25.0~dB),
+	and $\abs{H}$ at \qty{400}{\kHz} is unchanged at $-92.5$~dB. A shunt leg costs
+	no high-frequency attenuation, only board space for $C_d$.
+\end{examplebox}

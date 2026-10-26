@@ -30,11 +30,19 @@ def main():
     print(f"Wrote {index_path}")
 
 
+# Folders that aren't course codes get an explicit display name
+DISPLAY_NAMES = {
+    "EMIFilter": "EMI Input Filter",
+}
+
+
 def prettify_class_name(cls: str) -> str:
     """
     Turn something like 'EENG4312' into 'EENG 4312'.
     Super dumb but good enough for course codes.
     """
+    if cls in DISPLAY_NAMES:
+        return DISPLAY_NAMES[cls]
     prefix = "".join(ch for ch in cls if not ch.isdigit())
     suffix = "".join(ch for ch in cls if ch.isdigit())
     if prefix and suffix:

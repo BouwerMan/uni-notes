@@ -1,0 +1,246 @@
+\chapter{Damping}
+\label{ch:damping}
+
+\begin{idea}
+	Damping needs a resistance of order $R_0$ in the resonant loop that carries
+	no DC. Putting $R_0$ in series with the line would burn power and drop
+	voltage. A damping \emph{leg} avoids that:
+	\begin{itemize}
+		\item An $R_d$--$L_d$ leg across $L$ sees no DC, because $L$ shorts it.
+		\item An $R_d$--$C_d$ leg across $C$ sees no DC, because $C_d$ blocks it.
+	\end{itemize}
+\end{idea}
+
+The design question for either leg is how big to make it. Call its size
+$n$: $n = L_d/L$ or $n = C_d/C$. For each $n$ there is one $R_d$ that
+minimizes the worst-case $\Zo$ peak. That optimum peak is written
+\[
+	\norm{\Zo}_{mm} = \min_{R_d}\left(\max_f \abs{\Zo}\right).
+\]
+
+All closed forms here are from Erickson \& Maksimovi\'c, Ch.~17
+\cite{erickson}, and were checked against a brute-force optimum to 4 digits.
+$R_0 = \sqrt{L/C}$ is always the \emph{undamped} section's value.
+
+% -------------------------------------------------------------------
+
+\section{\texorpdfstring{$R_d$--$L_d$}{Rd-Ld} leg across the inductor}
+\label{sec:rd-ld}
+
+\subsection{What the loop sees}
+
+\begin{derivation}
+	The inductor with its leg is $sL \parallel (R_d + sL_d)$:
+	\[
+		Z = \frac{sL(R_d + sL_d)}{R_d + s(L + L_d)}.
+	\]
+	At $s = j\omega$, multiply through by the conjugate of the denominator
+	and keep the real part:
+	\[
+		\operatorname{Re}\left[(j\omega L R_d - \omega^2 L L_d)(R_d - j\omega(L + L_d))\right]
+		= -\omega^2 L L_d R_d + \omega^2 L R_d (L + L_d) = \omega^2 L^2 R_d.
+	\]
+	Dividing by $\abs{R_d + j\omega(L+L_d)}^2$:
+	\begin{equation}\label{eq:reff}
+		R_{eff}(\omega) = \frac{R_d(\omega L)^2}{R_d^2 + \omega^2(L + L_d)^2}.
+	\end{equation}
+\end{derivation}
+
+So the leg adds a series resistance that is zero at DC and turns on above the corner
+\[
+	\omega_c = \frac{R_d}{L + L_d}, \qquad
+	R_{eff} \to \frac{R_d L^2}{(L + L_d)^2} = \frac{R_d}{(1+n)^2}\ \text{above } \omega_c.
+\]
+
+\subsection{The cost: lost high-frequency inductance}
+
+Well above $\omega_c$, $sL_d \gg R_d$ and the leg looks like a plain inductor in
+parallel with $L$:
+\begin{equation}\label{eq:lhf}
+	L_{HF} = L \parallel L_d = \frac{nL}{1+n}, \qquad
+	\text{penalty}_{dB} = 20\log_{10}\frac{1+n}{n}.
+\end{equation}
+
+To keep a target $L_{HF}$, you need $L = L_{HF}(1+n)/n$. Small $n$ damps hard
+and costs a lot of attenuation. $n = 1$ costs 6~dB.
+
+\subsection{The optimum, by the fixed-point method}
+
+\begin{idea}
+	Look at the two extremes of $R_d$:
+	\begin{itemize}
+		\item $R_d \to 0$: a lossless tank of $(L \parallel L_d)$ with $C$.
+		\item $R_d \to \infty$: a lossless tank of $L$ with $C$.
+	\end{itemize}
+	Those two $\abs{\Zo}$ curves cross at one frequency, and \emph{every}
+	$R_d$ curve passes through that crossing. No $R_d$ can get the peak below
+	the crossing height. The optimum $R_d$ puts the peak exactly there, with zero slope.
+\end{idea}
+
+\begin{derivation}
+	Write $L' = L \parallel L_d = nL/(1+n)$. A lossless tank $sL \parallel 1/(sC)$ has
+	\[
+		\Zo = \frac{j\omega L}{1 - \omega^2 LC}.
+	\]
+	At the crossing, the $R_d = 0$ tank is below its resonance and the
+	$R_d = \infty$ tank is above its own, so the two have equal magnitude and
+	opposite sign:
+	\[
+		\frac{\omega L}{1 - \omega^2 LC} = -\frac{\omega L'}{1 - \omega^2 L'C}
+		\quad\Rightarrow\quad
+		L + L' = 2\omega^2 L L' C
+		\quad\Rightarrow\quad
+		\omega^2 = \frac{L + L'}{2LL'C}.
+	\]
+	Substituting $L' = nL/(1+n)$ gives $L + L' = L(1+2n)/(1+n)$ and
+	$LL' = nL^2/(1+n)$, so
+	\[
+		\omega^2 = \frac{1 + 2n}{2n\,LC}.
+	\]
+	The height there, using $1 - \omega^2 LC = 1 - \frac{1+2n}{2n} = -\frac{1}{2n}$:
+	\[
+		\abs{\Zo} = \frac{\omega L}{1/(2n)} = 2n\,\omega L
+		= 2n R_0 \sqrt{\frac{1+2n}{2n}}
+		= R_0\sqrt{2n(1+2n)}.
+	\]
+\end{derivation}
+
+Setting $d\abs{\Zo}^2/d\omega = 0$ at that crossing and solving for $R_d$
+gives the optimum resistor. The algebra is long; the results are
+\begin{equation}\label{eq:rd-ld-opt}
+	\norm{\Zo}_{mm} = R_0\sqrt{2n(1+2n)}, \qquad
+	R_{d,opt} = R_0\sqrt{\frac{n(3+4n)(1+2n)}{2(1+4n)}}.
+\end{equation}
+
+\subsection{Choosing \texorpdfstring{$n$}{n}}
+
+Pick the \emph{largest} $n$ that meets the $\Zo$ target $Z_t$, since
+over-damping costs attenuation you do not get back.
+
+\begin{derivation}
+	Set the optimum peak equal to the target and let $k = (Z_t/R_0)^2$:
+	\[
+		2n(1+2n) = k \quad\Rightarrow\quad 4n^2 + 2n - k = 0
+		\quad\Rightarrow\quad
+		n_{max} = \frac{-1 + \sqrt{1 + 4k}}{4}.
+	\]
+\end{derivation}
+
+Parasitic DCR and ESR add to $R_{eff}$, so the exact peak sits below
+\zcref{eq:rd-ld-opt}. The formula is conservative, and the gap is largest
+at large $n$, where $R_d$ itself contributes less.
+
+\begin{figure}[ht]
+	\centering
+	\begin{tikzpicture}
+		\begin{loglogaxis}[
+				width=0.9\textwidth, height=6.5cm,
+				xmin=2e3, xmax=4e4, ymin=0.5, ymax=120,
+				xtick={2e3,5e3,1e4,2e4,4e4}, xticklabels={2k,5k,10k,20k,40k},
+				legend style={font=\small},
+				xlabel={Frequency (Hz)}, ylabel={$\abs{\Zo}$ ($\Omega$)},
+				legend pos=north east, legend cell align=left,
+				grid=both, grid style={black!8},
+			]
+			\addplot[black, thick] table[x=f, y=undamped] {figures/single-stage-zo.dat};
+			\addplot[blue, thick] table[x=f, y=n05] {figures/single-stage-zo.dat};
+			\addplot[green!50!black, thick] table[x=f, y=n1] {figures/single-stage-zo.dat};
+			\addplot[orange, thick] table[x=f, y=nmax] {figures/single-stage-zo.dat};
+			\addplot[red, dashed, thick, domain=2e3:4e4] {26.9};
+			\legend{undamped, {$n=0.5$}, {$n=1$}, {$n=4$}, {$\abs{\Zin}/3.16$}}
+		\end{loglogaxis}
+	\end{tikzpicture}
+	\caption{The \zcref{ex:first-try} stage, undamped and with an optimally sized
+		$R_d$--$L_d$ leg. Larger $n$ leaves a higher peak but costs less attenuation.}
+	\label{fig:single-stage-zo}
+\end{figure}
+
+% -------------------------------------------------------------------
+
+\section{\texorpdfstring{$R_d$--$C_d$}{Rd-Cd} leg across the capacitor}
+\label{sec:rd-cd}
+
+Same idea, with the leg $R_d + 1/(sC_d)$ across $C$ and $n = C_d/C$.
+This leg costs no high-frequency attenuation (above its corner $C_d$ just adds
+to $C$), but $C_d$ is usually a large capacitor.
+
+\begin{derivation}
+	The extremes: $R_d \to 0$ gives $L$ with $C(1+n)$; $R_d \to \infty$ gives
+	$L$ with $C$. Equal magnitude, opposite sign:
+	\[
+		1 - \omega^2 LC(1+n) = -(1 - \omega^2 LC)
+		\quad\Rightarrow\quad
+		\omega^2 = \frac{2}{(2+n)LC}.
+	\]
+	Then $1 - \omega^2 LC = n/(2+n)$, and the height is
+	\[
+		\abs{\Zo} = \frac{\omega L}{n/(2+n)} = R_0\sqrt{\frac{2}{2+n}}\cdot\frac{2+n}{n}
+		= R_0\frac{\sqrt{2(2+n)}}{n}.
+	\]
+\end{derivation}
+
+\begin{equation}\label{eq:rd-cd-opt}
+	\norm{\Zo}_{mm} = R_0\frac{\sqrt{2(2+n)}}{n}, \qquad
+	R_{d,opt} = R_0\sqrt{\frac{(2+n)(4+3n)}{2n^2(4+n)}}.
+\end{equation}
+
+Here a bigger leg damps harder, so you want the \emph{smallest} $n$ that
+meets the target. With $k = (Z_t/R_0)^2$, $kn^2 - 2n - 4 = 0$ gives
+\[
+	n_{min} = \frac{1 + \sqrt{1 + 4k}}{k}.
+\]
+
+\begin{examplebox}[label=ex:damp-first-try]{damping the first-try LC}
+	Add an $R_d$--$L_d$ leg to the \zcref{ex:first-try} stage
+	($R_0 = \qty{3.16}{\ohm}$). The target from \zcref{ex:zin} is
+	$Z_t = \qty{26.9}{\ohm}$, so
+	\[
+		k = \left(\frac{26.9}{3.16}\right)^2 = 72.4, \qquad
+		n_{max} = \frac{-1 + \sqrt{1 + 4(72.4)}}{4} = 4.0.
+	\]
+	\zcref[S]{eq:rd-ld-opt} and \zcref{eq:lhf} for three choices of $n$, with the
+	exact results from a sweep that includes the \qty{0.13}{\ohm} of parasitics:
+
+	\begin{center}
+		\small
+		\begin{tabular}{@{}lllllll@{}}
+			\toprule
+			$n$   & $R_{d,opt}$      & Formula peak     & Exact peak       & Margin  & Penalty & $\abs{H}$ at \qty{400}{\kHz} \\
+			\midrule
+			0.5   & \qty{2.89}{\ohm} & \qty{4.47}{\ohm} & \qty{4.32}{\ohm} & 25.9~dB & 9.5~dB  & $-59.6$~dB                   \\
+			1     & \qty{4.58}{\ohm} & \qty{7.75}{\ohm} & \qty{7.22}{\ohm} & 21.4~dB & 6.0~dB  & $-63.2$~dB                   \\
+			4.0   & \qty{14.2}{\ohm} & \qty{26.9}{\ohm} & \qty{20.4}{\ohm} & 12.4~dB & 1.9~dB  & $-67.2$~dB                   \\
+			\bottomrule
+		\end{tabular}
+	\end{center}
+
+	Every row is now stable, but look at the cost. $n = 0.5$ buys 26~dB of
+	stability margin, far more than needed, and gives up 9.5~dB of attenuation
+	for it. $n = 4$ meets the target while giving up only 1.9~dB.
+	The exact peaks sit below the formula because DCR and ESR damp on top of
+	$R_d$, most noticeably at large $n$ where $R_d$ adds the least.
+
+	None of these meets the 80.4~dB requirement, since the undamped stage only
+	managed 69.2~dB to begin with.
+\end{examplebox}
+
+\begin{examplebox}[label=ex:single-damped]{a single damped stage that meets the requirement}
+	\zcref[S]{ex:requirement} needs $L = \qty{244}{\micro\henry}$ with
+	\qty{6.8}{\micro\farad} for 80.4~dB. With a damping leg that is the
+	inductance that must be left at high frequency, $L_{HF}$, so
+	$L = L_{HF}(1+n)/n$.
+
+	With $n = 1$:
+	\[
+		L = L_d = 2(244) = \qty{489}{\micro\henry}, \qquad
+		R_0 = \sqrt{\frac{489}{6.8}}\,\Omega = \qty{8.48}{\ohm}, \qquad
+		\norm{\Zo}_{mm} = 8.48\sqrt{6} = \qty{20.8}{\ohm}.
+	\]
+	That passes the \qty{26.9}{\ohm} target. With $n = 0.5$ it takes
+	\qty{733}{\micro\henry} plus \qty{367}{\micro\henry}. Going the other way,
+	$n = 1.5$ just passes (\qty{26.8}{\ohm}) and $n = 2$ fails (\qty{32.8}{\ohm}).
+
+	Either way the stage needs about \qty{1}{\milli\henry} of total inductance.
+	The two-stage design in \zcref{ch:two-stage} meets the same requirement with
+	about \qty{83}{\micro\henry} and the same total capacitance.
+\end{examplebox}

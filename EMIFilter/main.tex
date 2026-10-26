@@ -1,0 +1,84 @@
+\documentclass{report}
+
+\usepackage{amsmath, amssymb}
+\usepackage{mathtools}
+
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}%
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}%
+
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage[american]{circuitikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{fillbetween}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{zref-clever}
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{listings,breakable,theorems}
+
+\sisetup{per-mode=symbol}
+
+% Notation used throughout
+\newcommand{\Zo}{Z_o}
+\newcommand{\Zin}{Z_{in}}
+\newcommand{\Rloop}{R_{loop}}
+\newcommand{\ESR}{\mathrm{ESR}}
+\newcommand{\DCR}{\mathrm{DCR}}
+\newcommand{\dBuA}{dB$\mu$A}
+
+\newtcolorbox{idea}{
+  colback=white,
+  colframe=black!10,
+  breakable,
+  title=Idea,
+  coltitle=black
+}
+
+\newtcolorbox{derivation}{
+  colback=blue!1,
+  colframe=blue!25,
+  breakable,
+  title=Derivation
+}
+
+\newtcolorbox[
+  auto counter,
+  number within=chapter,
+  ]{examplebox}[2][]{
+  colback=green!5,
+  colframe=green!40,
+  coltitle=black,
+  breakable,
+  label type=example,
+  fonttitle=\bfseries,
+  title={Example \thetcbcounter: #2},
+  #1
+}
+
+\title{EMI Input Filter Design\\[0.5em]\large A worked reference for DC--DC converter input filters}
+\author{Dylan Parks}
+
+\begin{document}
+\setlength{\parindent}{0pt}
+\maketitle
+\tableofcontents
+
+\input{tex/ch01-method}
+\input{tex/ch02-single-stage}
+\input{tex/ch03-damping}
+\input{tex/ch04-two-stage}
+\input{tex/ch05-source-impedance}
+\input{tex/ch06-common-mode}
+\input{tex/ch07-turn-on}
+
+\appendix
+\input{tex/appA-quick-reference}
+
+\input{tex/references}
+
+\end{document}

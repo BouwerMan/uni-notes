@@ -1,0 +1,236 @@
+\chapter{Introduction}
+\label{ch:intro}
+
+A switching converter draws its input current in pulses. Left alone, those
+pulses flow back out onto the supply bus as conducted noise. An input filter
+sits between the bus and the converter to keep that noise in, and it has two
+jobs that pull against each other:
+
+\begin{enumerate}
+	\item \textbf{Emissions.} Attenuate the converter's noise current enough to
+	      meet a conducted emissions limit at the switching frequency.
+	\item \textbf{Stability.} Do not destabilize the converter. A lightly damped
+	      LC filter in front of a regulated converter can oscillate.
+\end{enumerate}
+
+These notes build up the analysis one piece at a time: one LC stage,
+damping, two stages, the effect of the source, the common-mode path, and
+turn-on. Each chapter applies its results to the same example design.
+
+\section{The example design}
+\label{sec:example-spec}
+
+Throughout, the device is a DC--DC converter on a \qty{120}{\volt} bus.
+
+\begin{center}
+	\begin{tabular}{@{}ll@{}}
+		\toprule
+		Quantity                              & Value                                                            \\
+		\midrule
+		Bus, nominal                          & \qty{120}{\volt} DC                                              \\
+		Minimum at converter terminals        & \qty{100}{\volt} DC                                              \\
+		Converter output power                & \qty{100}{\watt}                                                  \\
+		Efficiency                            & 0.85, so $P_{in} = \qty{117.6}{\watt}$                           \\
+		Lowest switching frequency at load    & \qty{400}{\kilo\hertz}                                           \\
+		DM emission limit at \qty{400}{\kHz}  & 50~\dBuA{} (example value)                                       \\
+		Margin to the limit                   & 6~dB                                                             \\
+		Stability target                      & $\abs{\Zo}$ at least 10~dB below $\abs{\Zin}$ at every frequency \\
+		Converter overvoltage shutdown        & \qty{200}{\volt}                                                 \\
+		\bottomrule
+	\end{tabular}
+\end{center}
+
+All capacitor values in the examples are \emph{effective} values at 100 to
+\qty{120}{\volt} bias. Ceramic capacitors can lose half their capacitance or
+more at rated bias, so derate them before you start or every answer shifts.
+
+\section{Notation}
+
+\begin{itemize}
+	\item $s = j\omega$, $\omega = 2\pi f$.
+	\item $f_0 = 1/(2\pi\sqrt{LC})$ is the resonant frequency of an $L$--$C$ pair.
+	\item $R_0 = \sqrt{L/C}$ is its characteristic impedance.
+	\item $Q = R_0/\Rloop$, where $\Rloop$ is the series loop resistance.
+	\item $\parallel$ means parallel combination: $Z_1 \parallel Z_2 = Z_1Z_2/(Z_1+Z_2)$.
+\end{itemize}
+
+$R_0$ and $\Zo$ look alike but are different things. $R_0$ (zero) is a single
+number belonging to one $L$--$C$ pair. $\Zo$ (letter o) is a function of
+frequency for the whole filter. \zcref{ch:quickref} has the full symbol table.
+
+% -------------------------------------------------------------------
+
+\section{One ladder, two functions}
+\label{sec:method}
+
+\begin{idea}
+	Every input filter question reduces to two functions of one ladder network:
+	\begin{itemize}
+		\item the noise transfer $H(s) = i_{line}/i_n$, for emissions, and
+		\item the output impedance $\Zo(s)$ seen by the converter, for stability.
+	\end{itemize}
+	Both come from the same impedance algebra and share the same poles, so a
+	resonance that hurts one hurts the other.
+\end{idea}
+
+\zcref[S]{fig:dm-circuit} is the two-stage filter used in most of these notes.
+Build the impedances left to right, from the source. Divide the noise current
+right to left, from the converter.
+
+\begin{figure}[ht]
+	\centering
+	\begin{circuitikz}[scale=0.85, transform shape]
+		\draw (0,0) to[V, v<=$V_s$] (0,3)
+		to[generic, l=$Z_s$, i>^=$i_{line}$] (2.2,3)
+		to[L, l=$L_{lk}$] (4,3)
+		to[L, l_=$L_1$, *-*] (7,3)
+		to[short] (7.5,3)
+		to[L, l=$L_2$, *-] (10,3)
+		to[short, -o] (12,3);
+		\draw (4,3) -- (4,4.4) to[R, l=$R_d$] (5.5,4.4) to[L, l=$L_d$] (7,4.4) -- (7,3);
+		\draw (7.5,3) to[C, l=$C_1$] (7.5,0);
+		\draw (10,3) to[C, l_=$C_2$, *-*] (10,0);
+		\draw (0,0) -- (12,0);
+		\draw[dashed] (12.2,3.3) rectangle (14.2,-0.3);
+		\draw (12,3) -- (13.2,3) to[I, l=$i_n$] (13.2,0) -- (12,0);
+		\node[align=center, font=\small] at (13.2,3.7) {converter};
+		\draw[-latex, thick] (11.8,1.5) -- node[above, font=\small] {$\Zo$} (10.9,1.5);
+		\node[font=\small, align=center] at (2.9,4.6) {CM choke\\(DM leakage)};
+	\end{circuitikz}
+	\caption{Differential-mode (DM) equivalent of a two-stage input filter.
+		Parasitic DCR and ESR are folded into each $Z$.}
+	\label{fig:dm-circuit}
+\end{figure}
+
+\subsection{The DM equivalent circuit}
+
+\begin{enumerate}
+	\item Fold the return line into the loop. Every series element counts once
+	      per loop: both DCRs, the choke's total leakage, any series capacitors.
+	\item A common-mode (CM) choke contributes only its DM leakage $L_{lk}$ and
+	      winding resistance. Its CM inductance cancels for DM current (\zcref{sec:cm-winding}).
+	\item The source is an impedance $Z_s$. A stiff bus is a small $R$ plus $L$.
+	      Test setups add their own impedance (\zcref{ch:source}).
+	\item The converter gets two models. For emissions it is a current source
+	      $i_n$: it forces its pulsed input current whatever the filter does.
+	      For stability it is a negative resistance.
+\end{enumerate}
+
+\begin{derivation}
+	A regulated converter holds its output power constant, so below its loop
+	crossover it holds $P_{in}$ constant too:
+	\[
+		I = \frac{P_{in}}{V}
+		\quad\Rightarrow\quad
+		\frac{dI}{dV} = -\frac{P_{in}}{V^2}
+		\quad\Rightarrow\quad
+		\Zin = \frac{dV}{dI} = -\frac{V^2}{P_{in}}.
+	\]
+	Raise the input voltage and the converter draws \emph{less} current.
+	That is a negative incremental resistance, and a negative resistance can
+	cancel the losses that damp a filter resonance.
+\end{derivation}
+
+Above the converter's crossover $\abs{\Zin}$ rises, so using $V^2/P_{in}$ at
+every frequency is conservative. The worst case is the smallest $\abs{\Zin}$:
+minimum input voltage, maximum load.
+
+\subsection{Building the ladder}
+
+From the source end:
+\begin{equation}\label{eq:ladder}
+	\begin{aligned}
+		Z_{L1}'   & = Z_{L1} \parallel (R_d + sL_d),  & Z_{up,0} & = Z_s + Z_{cm} + Z_{L1}',                   \\
+		Z_{up,1}  & = Z_{C1} \parallel Z_{up,0},      & \Zo      & = Z_{C2} \parallel \left(Z_{L2} + Z_{up,1}\right).
+	\end{aligned}
+\end{equation}
+
+Each $Z$ includes its parasitic:
+\[
+	Z_L = R_{\DCR} + sL, \qquad Z_C = \ESR + \frac{1}{sC}.
+\]
+
+\subsection{Noise transfer}
+
+When a current $i_{in}$ splits between branches $Z_1$ and $Z_2$, the share in
+branch 1 is
+\begin{equation}\label{eq:current-divider}
+	i_1 = i_{in}\,\frac{Z_2}{Z_1 + Z_2}.
+\end{equation}
+
+The noise current splits at each shunt capacitor. Multiply one divider per
+stage, working from the converter toward the source:
+\begin{equation}\label{eq:H-ladder}
+	H(s) = \frac{i_{line}}{i_n}
+	= \underbrace{\frac{Z_{C2}}{Z_{C2} + Z_{L2} + Z_{up,1}}}_{\text{at } C_2}
+	\cdot \underbrace{\frac{Z_{C1}}{Z_{C1} + Z_{up,0}}}_{\text{at } C_1}.
+\end{equation}
+
+The emission at a frequency, in \dBuA, is the converter's noise level plus
+$20\log_{10}\abs{H}$.
+
+\begin{idea}
+	By reciprocity, the same $H$ is the bus-voltage to converter-voltage transfer
+	with the converter port open. A peak in $H$ therefore also amplifies bus
+	transients and anything injected on the line.
+\end{idea}
+
+\subsection{Middlebrook's stability criterion}
+
+\begin{derivation}
+	Replace the filter by its Th\'evenin equivalent as seen from the converter:
+	a source $v_{th}$ behind $\Zo$. The converter is the impedance $\Zin$.
+	The voltage the converter actually gets is
+	\[
+		v_{in} = v_{th}\,\frac{\Zin}{\Zin + \Zo} = \frac{v_{th}}{1 + \Zo/\Zin}.
+	\]
+	This has the same form as a closed-loop transfer function $1/(1+T)$, with
+	the \emph{minor loop gain}
+	\[
+		T_m = \frac{\Zo}{\Zin}.
+	\]
+	The filter-plus-converter system is unstable if the Nyquist plot of $T_m$
+	encircles $-1$. If $\abs{T_m} < 1$ at every frequency, the plot stays inside
+	the unit circle and cannot reach $-1$. So $\abs{\Zo} < \abs{\Zin}$
+	everywhere guarantees the filter cannot destabilize the converter.
+\end{derivation}
+
+Design for margin at minimum input voltage and maximum load, with every source
+impedance the device will see:
+\begin{equation}\label{eq:middlebrook}
+	\abs{\Zin}_{min} = \frac{V_{min}^2}{P_{in}}, \qquad
+	\text{margin (dB)} = 20\log_{10}\frac{\abs{\Zin}_{min}}{\max_f \abs{\Zo(f)}}.
+\end{equation}
+
+\begin{examplebox}[label=ex:zin]{stability target}
+	For the example device at minimum input voltage and full load:
+	\[
+		P_{in} = \frac{\qty{100}{\watt}}{0.85} = \qty{117.6}{\watt}, \qquad
+		\abs{\Zin}_{min} = \frac{(\qty{100}{\volt})^2}{\qty{117.6}{\watt}} = \qty{85.0}{\ohm}.
+	\]
+	A 10~dB margin is a factor of $10^{10/20} = 3.16$, so the filter must keep
+	\[
+		\abs{\Zo} \leq \frac{\qty{85.0}{\ohm}}{3.16} = \qty{26.9}{\ohm}
+	\]
+	at every frequency, on every source.
+\end{examplebox}
+
+\subsection{Paper shortcuts}
+
+Each is derived in the chapter noted.
+
+\begin{enumerate}
+	\item One stage, above $f_0$: $\abs{H} \approx (f_0/f)^2$, a slope of
+	      $-40$~dB/decade (\zcref{sec:above-resonance}).
+	\item Two stages, above both resonances: $\abs{H} \approx (f_{01}f_{02}/f^2)^2$,
+	      where $f_{0k} = 1/(2\pi\sqrt{L_kC_k})$ are the isolated stage resonances.
+	      This holds however strongly the stages interact (\zcref{sec:hf-asymptote}).
+	\item A lightly damped series-loop resonance: $\Zo$ peak $\approx QR_0 = R_0^2/\Rloop$
+	      (\zcref{sec:zo-peak}).
+	\item $C_2$ resonating against $L_2$ in series with $C_1$: $\Zo$ peak
+	      $\approx X_{C2}^2/\Rloop$, with $X_{C2} = 1/(\omega C_2)$ at that
+	      resonance (\zcref{sec:undamped-stage}).
+	\item An $R_d$--$L_d$ leg across $L_1$ leaves $L_1 \parallel L_d = L_1 n/(1+n)$
+	      at high frequency. It costs $20\log_{10}((1+n)/n)$~dB of attenuation
+	      (\zcref{sec:rd-ld}).
+\end{enumerate}

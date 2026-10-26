@@ -1,0 +1,74 @@
+\chapter{Quick Reference}
+\label{ch:quickref}
+
+\section{Symbols}
+
+\begin{center}
+	\small
+	\begin{tabular}{@{}lp{0.3\textwidth}p{0.45\textwidth}@{}}
+		\toprule
+		Symbol                 & Formula                                      & What it is                                                                 \\
+		\midrule
+		$s$                    & $j\omega$                                    & Complex frequency. Set $s = j\omega$ to evaluate at a real frequency       \\
+		$\omega$, $f$          & $\omega = 2\pi f$                            & Any ratio of two frequencies is the same in either                         \\
+		$f_0$                  & $1/(2\pi\sqrt{LC})$                          & Resonance: where the $L$ and $C$ reactances are equal and cancel          \\
+		$x$                    & $f/f_0$                                      & Normalized frequency. Above 1 is the stopband                              \\
+		$R_0$                  & $\sqrt{L/C} = \omega_0 L = 1/(\omega_0 C)$   & Characteristic impedance: the reactance of $L$ or $C$ at $f_0$             \\
+		$\Rloop$               & DCR + ESR + any series $R$                   & Total resistance around the resonant loop                                  \\
+		$Q$                    & $R_0/\Rloop$                                 & How many times resonance amplifies                                         \\
+		$\zeta$                & $1/(2Q)$                                     & Damping ratio. Sets step overshoot                                         \\
+		$f_z$                  & $1/(2\pi C\,\ESR)$                           & ESR zero. Above it the capacitor looks resistive                           \\
+		$\Zo$                  & looking back from the converter, source shorted & Filter output impedance: the source the converter sees                  \\
+		$\Zin$                 & $-V^2/P_{in}$                                & Converter incremental input impedance, below its loop crossover            \\
+		$T_m$                  & $\Zo/\Zin$                                   & Minor loop gain                                                            \\
+		$H$                    & $i_{line}/i_n$                               & Noise transfer. Below 1 in the stopband                                    \\
+		$A$                    & $1/\abs{H}$, $A_{dB} = -20\log_{10}\abs{H}$  & Attenuation. Positive in dB                                                \\
+		$n$                    & $L_d/L$ or $C_d/C$                           & Size of a damping leg relative to the element it damps                     \\
+		$\norm{\Zo}_{mm}$      & $\min_{R_d}\max_f \abs{\Zo}$                 & Best achievable peak: the optimally damped $\Zo$                           \\
+		$L_{HF}$               & $nL/(1+n)$                                   & Inductance left at high frequency with an $R_d$--$L_d$ leg                 \\
+		$R_{eff}(\omega)$      & $R_d(\omega L)^2/(R_d^2 + \omega^2(L+L_d)^2)$ & Resistance an $R_d$--$L_d$ leg adds to the loop. Zero at DC               \\
+		$L_{lk}$               & measure with windings opposed                & CM choke DM leakage: the only part of the choke DM current sees            \\
+		$L_{cm}$               & datasheet, per winding                       & CM inductance: what the total CM current sees                              \\
+		\bottomrule
+	\end{tabular}
+\end{center}
+
+\section{Units and dB rules}
+
+\[
+	\frac{\omega}{\omega_0} = \frac{f}{f_0}, \qquad
+	I_{rms} = \frac{I_{pk}}{\sqrt{2}}, \qquad
+	N_{\text{dB}\mu\text{A}} = 20\log_{10}\frac{I_{rms}}{\qty{1}{\micro\ampere}}
+\]
+\[
+	A_{dB} = -20\log_{10}\abs{H}, \qquad
+	20\log_{10}\abs{ab} = 20\log_{10}\abs{a} + 20\log_{10}\abs{b}
+\]
+
+A factor of 2 is 6.02~dB, a factor of 10 is 20~dB. Each LC stage adds
+$-40$~dB/decade above its resonance.
+
+\section{Key results}
+
+\begin{center}
+	\small
+	\renewcommand{\arraystretch}{1.6}
+	\begin{tabular}{@{}lll@{}}
+		\toprule
+		Result                         & Formula                                                                     & Ref.                       \\
+		\midrule
+		$\Zo$ peak, one loop           & $R_0^2/\Rloop$                                                              & \zcref[noname]{eq:zo-peak} \\
+		Single stage HF                & $\abs{H} \approx (f_0/f)^2$                                                 &                            \\
+		Two stage HF                   & $\abs{H} \approx (f_{01}f_{02}/f^2)^2$                                      & \zcref[noname]{eq:hf-two-stage} \\
+		Middlebrook margin             & $20\log_{10}(\abs{\Zin}_{min}/\max\abs{\Zo})$                               & \zcref[noname]{eq:middlebrook} \\
+		$R_d$--$L_d$ optimum           & $R_0\sqrt{2n(1+2n)}$                                                        & \zcref[noname]{eq:rd-ld-opt} \\
+		$R_d$--$L_d$ penalty           & $20\log_{10}((1+n)/n)$                                                      & \zcref[noname]{eq:lhf}     \\
+		$R_d$--$C_d$ optimum           & $R_0\sqrt{2(2+n)}/n$                                                        & \zcref[noname]{eq:rd-cd-opt} \\
+		Coupled modes                  & $a\omega^4 - b\omega^2 + 1 = 0$                                             & \zcref[noname]{eq:modes}   \\
+		Undamped stage peak            & $L_2C_s/(C_2^2\Rloop)$                                                      & \zcref[noname]{eq:zo-hi}   \\
+		CM, no Y caps                  & $IL = \abs{1 - \omega^2L_{cm}C_p}$                                          &                            \\
+		Step overshoot                 & $1 + e^{-\pi\zeta/\sqrt{1-\zeta^2}}$                                        &                            \\
+		$R_d$ pulse energy             & $\leq \tfrac{1}{2}(C_1+C_2)V^2$                                             &                            \\
+		\bottomrule
+	\end{tabular}
+\end{center}

@@ -1,0 +1,306 @@
+\chapter{Two Stages}
+\label{ch:two-stage}
+
+\zcref[S]{ex:single-damped} shows the price of meeting the requirement with
+one damped stage: about \qty{1}{\milli\henry} of inductance. Two stages get the
+same attenuation from far smaller parts, because attenuation grows as $f^4$
+instead of $f^2$. The catch is that cascaded stages do not resonate at their
+isolated frequencies.
+
+\section{Transfer function}
+
+\begin{derivation}
+	Take the lossless ladder with an ideal source and no choke, so
+	$Z_{up,0} = sL_1$. The divider at $C_1$ is
+	\[
+		\frac{Z_{C1}}{Z_{C1} + sL_1} = \frac{1}{1 + s^2 L_1C_1}.
+	\]
+	Looking upstream from $L_2$, stage 1 is
+	\[
+		Z_{up,1} = sL_1 \parallel \frac{1}{sC_1} = \frac{sL_1}{1 + s^2L_1C_1}.
+	\]
+	The divider at $C_2$, after multiplying through by $sC_2$:
+	\[
+		\frac{1/(sC_2)}{1/(sC_2) + sL_2 + Z_{up,1}}
+		= \frac{1}{1 + s^2L_2C_2 + \dfrac{s^2L_1C_2}{1 + s^2L_1C_1}}.
+	\]
+	Multiply the two dividers. The $(1 + s^2L_1C_1)$ factors combine:
+	\[
+		H(s) = \frac{1}{(1 + s^2L_1C_1)(1 + s^2L_2C_2) + s^2L_1C_2}.
+	\]
+\end{derivation}
+
+Expanding,
+\begin{equation}\label{eq:H-two-stage}
+	H(s) = \frac{1}{1 + s^2 b + s^4 a}, \qquad
+	a = L_1L_2C_1C_2, \qquad
+	b = L_1C_1 + L_2C_2 + \underbrace{L_1C_2}_{\text{interaction}}.
+\end{equation}
+
+\begin{idea}
+	If the stages did not load each other, $H$ would just be
+	$(1 + s^2L_1C_1)(1 + s^2L_2C_2)$ upside down. The extra $L_1C_2$ term comes
+	entirely from stage 2 seeing stage 1's impedance $Z_{up,1}$. It is small only
+	when $C_2 \ll C_1$. Otherwise the isolated-stage picture fails, and you must
+	design damping for the coupled modes.
+\end{idea}
+
+\section{Coupled modes}
+
+With $s^2 = -\omega^2$, the poles satisfy a quadratic in $\omega^2$:
+\begin{equation}\label{eq:modes}
+	a\,\omega^4 - b\,\omega^2 + 1 = 0
+	\quad\Rightarrow\quad
+	\omega^2 = \frac{b \pm \sqrt{b^2 - 4a}}{2a}.
+\end{equation}
+
+\begin{derivation}
+	The product of the roots of a quadratic is its constant term over its
+	leading coefficient:
+	\[
+		\omega_{lo}^2\,\omega_{hi}^2 = \frac{1}{a} = \frac{1}{L_1C_1}\cdot\frac{1}{L_2C_2} = \omega_{01}^2\,\omega_{02}^2
+		\quad\Rightarrow\quad
+		f_{lo}\,f_{hi} = f_{01}\,f_{02}.
+	\]
+	Coupling pushes the modes apart, but their product never moves.
+\end{derivation}
+
+\subsection{Estimating the modes on sight}
+
+\begin{itemize}
+	\item \textbf{Low mode.} At low frequency $L_2$ is nearly a short, so $C_1$
+	      and $C_2$ sit in parallel and charge together through $L_1 + L_2$.
+	\item \textbf{High mode.} At high frequency $L_1$ is nearly open, so $L_2$
+	      rings in a loop with $C_1$ and $C_2$ in series.
+\end{itemize}
+\begin{equation}\label{eq:mode-estimates}
+	f_{lo} \approx \frac{1}{2\pi\sqrt{(L_1 + L_2)(C_1 + C_2)}}, \qquad
+	f_{hi} \approx \frac{1}{2\pi\sqrt{L_2 C_s}}, \qquad
+	C_s = \frac{C_1C_2}{C_1 + C_2}.
+\end{equation}
+
+These mode shapes are what tell you where to put damping (\zcref{sec:damp-ladder}).
+
+\section{Output impedance null}
+
+Between the two peaks, $\Zo$ dips toward zero.
+
+\begin{derivation}
+	$\Zo = Z_{C2} \parallel (sL_2 + Z_{up,1})$ goes to zero when the $L_2$
+	branch looks like a short:
+	\[
+		sL_2 + \frac{sL_1}{1 + s^2L_1C_1} = 0
+		\quad\Rightarrow\quad
+		L_2(1 - \omega^2L_1C_1) + L_1 = 0
+		\quad\Rightarrow\quad
+		\omega_{null}^2 = \frac{L_1 + L_2}{L_1L_2C_1}.
+	\]
+	This is a series resonance of $L_2$ against stage 1 (which is capacitive
+	above $f_{01}$), shorting $C_2$.
+\end{derivation}
+
+\section{High-frequency asymptote}
+\label{sec:hf-asymptote}
+
+Well above both modes the $s^4$ term dominates \zcref{eq:H-two-stage}:
+\begin{equation}\label{eq:hf-two-stage}
+	\abs{H} \approx \frac{1}{\omega^4 L_1L_2C_1C_2} = \left(\frac{f_{01}f_{02}}{f^2}\right)^2,
+	\qquad A_{dB} = 40\log_{10}\frac{f^2}{f_{01}f_{02}}.
+\end{equation}
+
+The interaction term lives only in $b$, so this asymptote is exact however
+strongly the stages interact.
+
+\section{The candidate design}
+\label{sec:candidate}
+
+The rest of these notes use this two-stage design, laid out as in
+\zcref{fig:dm-circuit}.
+
+\begin{center}
+	\begin{tabular}{@{}lll@{}}
+		\toprule
+		Element                  & Value                                                            & Parasitic                     \\
+		\midrule
+		CM choke                 & \qty{1}{\milli\henry} CM per winding, \qty{2}{\micro\henry} DM leakage (loop total) & \qty{0.03}{\ohm} per winding  \\
+		$L_1$ (source side)      & \qty{39}{\micro\henry}                                           & \qty{0.08}{\ohm} DCR          \\
+		Damping leg across $L_1$ & $L_d = nL_1$ in series with $R_d$                                & \qty{0.05}{\ohm} DCR in $L_d$ \\
+		$C_1$                    & \qty{2.2}{\micro\farad} effective                                & \qty{10}{\milli\ohm} ESR      \\
+		$L_2$ (converter side)   & \qty{4.7}{\micro\henry}                                          & \qty{0.02}{\ohm} DCR          \\
+		$C_2$                    & \qty{4.7}{\micro\farad} effective                                & \qty{5}{\milli\ohm} ESR       \\
+		\bottomrule
+	\end{tabular}
+\end{center}
+
+\begin{examplebox}[label=ex:coupled]{where the candidate really resonates}
+	Strip the candidate to its four main parts: no parasitics, no damping, no
+	choke, ideal source.
+
+	\textbf{Isolated stages.}
+	\[
+		f_{01} = \frac{1}{2\pi\sqrt{(39)(2.2)}\,\mu\text{s}} = \qty{17.2}{\kHz}, \quad R_{01} = \qty{4.21}{\ohm};
+		\qquad
+		f_{02} = \qty{33.9}{\kHz}, \quad R_{02} = \qty{1.00}{\ohm}.
+	\]
+
+	\textbf{Interaction.} The three terms of $b$ are
+	\[
+		L_1C_1 = \qty{8.58e-11}{\second\squared}, \qquad
+		L_2C_2 = \qty{2.21e-11}{\second\squared}, \qquad
+		L_1C_2 = \qty{1.83e-10}{\second\squared}.
+	\]
+	The interaction term is the \emph{largest} of the three, so the isolated
+	picture will be badly wrong. With $a = \qty{1.895e-21}{\second\tothe{4}}$,
+	\zcref{eq:modes} gives
+	\[
+		f_{lo} = \qty{9.44}{\kHz}, \qquad f_{hi} = \qty{61.7}{\kHz}.
+	\]
+	The modes sit well outside the isolated pair, nearly a factor of 2 each way.
+	As a check, $f_{lo}f_{hi} = \qty{5.82e8}{\hertz\squared} = f_{01}f_{02}$.
+
+	\textbf{On sight.} \zcref[S]{eq:mode-estimates} gives \qty{9.17}{\kHz} from
+	\qty{43.7}{\micro\henry} against \qty{6.9}{\micro\farad}, and \qty{60.0}{\kHz}
+	from $L_2$ against $C_s = \qty{1.50}{\micro\farad}$. Both within 3\%.
+
+	\textbf{Null.} $\Zo$ dips to zero at
+	$\sqrt{(L_1+L_2)/(L_1L_2C_1)}/2\pi = \qty{52.4}{\kHz}$, between the two modes.
+
+	\textbf{Attenuation.} At \qty{400}{\kHz} the asymptote gives $-97.6$~dB and
+	the exact value is $-97.4$~dB. That is 17~dB more than the 80.4~dB
+	requirement, which leaves room for the damping and choke leakage to come.
+\end{examplebox}
+
+% -------------------------------------------------------------------
+
+\section{Damping a coupled ladder}
+\label{sec:damp-ladder}
+
+The candidate damps stage 1 only: CM choke, $L_1$ with an $R_d$--$L_d$
+leg, $C_1$, then an undamped $L_2$--$C_2$. Two questions decide whether that
+works. Which mode does the leg damp, and can the undamped stage go without damping?
+
+\subsection{Damp the coupled mode, not the isolated stage}
+
+\begin{idea}
+	A leg across $L_1$ damps the mode whose current flows through $L_1$:
+	the low mode. In that mode $L_2$ is nearly a short, so $C_1$ and $C_2$
+	charge together through $L_1$. The $R_0$ that belongs in the damping
+	formulas uses the damped inductor and every capacitance the mode charges:
+	\[
+		R_{0,low} = \sqrt{\frac{L_1}{C_1 + C_2}}.
+	\]
+\end{idea}
+
+The closed form reads low when inductance sits outside the damped one
+($L_{lk}$ and $L_2$ here), since that inductance is part of the mode but
+does not see the leg.
+
+High-frequency attenuation with the leg and the choke leakage uses the
+inductance left in series above the leg's corner:
+\begin{equation}\label{eq:l1-eff}
+	L_{1,eff} = L_{lk} + \frac{nL_1}{1+n}, \qquad
+	\abs{H} \approx \frac{1}{\omega^4 L_{1,eff}\,C_1 L_2 C_2}.
+\end{equation}
+
+\subsection{Is the undamped stage OK?}
+\label{sec:undamped-stage}
+
+\begin{derivation}
+	In the high mode $L_1$ is effectively open, so from the $C_2$ terminals
+	\[
+		\Zo \approx Z_{C2} \parallel Z_b, \qquad
+		Z_b = R_b + j\left(\omega L_2 - \frac{1}{\omega C_1}\right),
+	\]
+	where $Z_b$ is the $L_2$--$C_1$ branch. At the loop resonance the reactances
+	around the loop cancel, so $Z_{C2} + Z_b = \Rloop$ and the branch reactance
+	equals $+X_{C2}$. Then, as in \zcref{sec:zo-peak},
+	\[
+		\abs{\Zo}_{peak,hi} \approx \frac{(-jX_{C2})(+jX_{C2})}{\Rloop} = \frac{X_{C2}^2}{\Rloop}.
+	\]
+	With $\omega^2 = 1/(L_2C_s)$, $X_{C2}^2 = 1/(\omega^2C_2^2)$:
+	\begin{equation}\label{eq:zo-hi}
+		\abs{\Zo}_{peak,hi} \approx \frac{L_2 C_s}{C_2^2\,\Rloop}, \qquad
+		\Rloop = R_{L2} + \ESR_1 + \ESR_2.
+	\end{equation}
+\end{derivation}
+
+Compare it with $\abs{\Zin}/3.16$ for a 10~dB margin. Watch the scaling:
+halving $C_2$ roughly triples it ($C_s$ falls too), and halving $\Rloop$ doubles it.
+
+\begin{figure}[ht]
+	\centering
+	\begin{tikzpicture}
+		\begin{loglogaxis}[
+				width=0.9\textwidth, height=6.5cm,
+				xmin=3e3, xmax=3e5, ymin=0.05, ymax=80,
+				xtick={3e3,1e4,3e4,1e5,3e5}, xticklabels={3k,10k,30k,100k,300k},
+				legend style={font=\small},
+				xlabel={Frequency (Hz)}, ylabel={$\abs{\Zo}$ ($\Omega$)},
+				legend pos=north east, legend cell align=left,
+				grid=both, grid style={black!8},
+			]
+			\addplot[black, thick] table[x=f, y=Zo_undamped] {figures/two-stage-zo.dat};
+			\addplot[blue, thick] table[x=f, y=Zo_damped] {figures/two-stage-zo.dat};
+			\addplot[red, dashed, thick, domain=3e3:3e5] {26.9};
+			\draw[gray, densely dotted] (axis cs:17.2e3,0.05) -- (axis cs:17.2e3,80)
+			node[pos=0.06, right, font=\scriptsize] {$f_{01}$};
+			\draw[gray, densely dotted] (axis cs:33.9e3,0.05) -- (axis cs:33.9e3,80)
+			node[pos=0.06, right, font=\scriptsize] {$f_{02}$};
+			\legend{undamped, {$n=1$, $R_d=\qty{3.4}{\ohm}$}, {$\abs{\Zin}/3.16$}}
+		\end{loglogaxis}
+	\end{tikzpicture}
+	\caption{The candidate design with parasitics and choke leakage. The peaks sit at the
+		coupled modes, nowhere near the isolated stage resonances $f_{01}$ and $f_{02}$.
+		The leg across $L_1$ flattens the low mode.}
+	\label{fig:two-stage-zo}
+\end{figure}
+
+\begin{examplebox}[label=ex:candidate-damped]{damping the candidate}
+	Now the full candidate: parasitics, the \qty{2}{\micro\henry} choke leakage,
+	ideal source.
+
+	\textbf{Undamped.} The sweep shows $\Zo$ peaks of \qty{43.0}{\ohm} at
+	\qty{9.2}{\kHz} and \qty{8.1}{\ohm} at \qty{61.6}{\kHz}, right at the coupled
+	modes. Against \qty{85.0}{\ohm} that is a 5.9~dB margin, which fails the
+	10~dB target. $H$ peaks at $+24.5$~dB at \qty{9.2}{\kHz}.
+
+	\textbf{Which $R_0$.} The low mode is the problem, and in it $L_2$ is nearly a
+	short, so $C_1$ and $C_2$ charge together through $L_1$:
+	\[
+		R_{0,low} = \sqrt{\frac{\qty{39}{\micro\henry}}{\qty{6.9}{\micro\farad}}} = \qty{2.38}{\ohm},
+		\qquad \text{not} \quad \sqrt{\frac{39}{2.2}}\,\Omega = \qty{4.21}{\ohm}.
+	\]
+
+	\textbf{Sizing the leg} with $n = 1$ ($L_d = \qty{39}{\micro\henry}$):
+	\begin{center}
+		\small
+		\begin{tabular}{@{}llll@{}}
+			\toprule
+			$R_0$ used                     & $R_d$            & $\Zo$ peaks                                                                & Margin  \\
+			\midrule
+			\qty{2.38}{\ohm} ($C_1 + C_2$) & \qty{3.45}{\ohm} & \qty{6.63}{\ohm} at \qty{10.9}{\kHz}, \qty{4.85}{\ohm} at \qty{63.1}{\kHz} & 22.2~dB \\
+			\qty{4.21}{\ohm} ($C_1$ only)  & \qty{6.10}{\ohm} & \qty{7.84}{\ohm} at \qty{9.9}{\kHz}, \qty{4.09}{\ohm} at \qty{63.0}{\kHz}  & 20.7~dB \\
+			Brute-force optimum            & \qty{3.40}{\ohm} & \qty{6.63}{\ohm}, \qty{4.86}{\ohm}                                         & 22.2~dB \\
+			\bottomrule
+		\end{tabular}
+	\end{center}
+	The coupled-mode $R_0$ lands on the true optimum. The formula predicts
+	$2.38\sqrt{6} = \qty{5.82}{\ohm}$; the real peak is 14\% higher because
+	$L_{lk}$ and $L_2$ are part of the mode but outside the damped inductor.
+	The design uses $R_d = \qty{3.4}{\ohm}$ from here on.
+
+	\textbf{The undamped stage.} At \qty{61.6}{\kHz}, $X_{C2} = \qty{0.550}{\ohm}$
+	and $\Rloop = 0.02 + 0.01 + 0.005 = \qty{0.035}{\ohm}$, so \zcref{eq:zo-hi}
+	gives $0.550^2/0.035 = \qty{8.6}{\ohm}$ (\qty{8.1}{\ohm} exact). That is well
+	under \qty{26.9}{\ohm}, so stage 2 needs no damping of its own. Its $H$ peak is
+	only about $+2.7$~dB, because the stage-1 divider is already attenuating at
+	\qty{62}{\kHz}.
+
+	\textbf{Attenuation.} $L_{1,eff} = 2 + 19.5 = \qty{21.5}{\micro\henry}$, and
+	\zcref{eq:l1-eff} gives $-92.4$~dB at \qty{400}{\kHz} ($-92.2$~dB exact).
+	That clears the 80.4~dB requirement by 11.8~dB. The low-mode $H$ peak is
+	down to $+9.7$~dB.
+
+	\textbf{Alternative.} $n = 0.5$ with $R_d = \qty{2.17}{\ohm}$ gives a 25.9~dB
+	margin and $-89.0$~dB at \qty{400}{\kHz}. More margin than needed, at a cost of 3~dB.
+\end{examplebox}
